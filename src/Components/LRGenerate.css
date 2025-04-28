@@ -1,0 +1,86 @@
+.header-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 2px solid black;
+    background: #17a2b8; /* Changed header background color */
+    color: white; /* Changed text color to white */
+  }
+  
+  .header-left,
+  .header-right {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .header-center {
+    text-align: center;
+  }
+  
+  .logo {
+    width: 80px;
+  }
+  
+  .truck-logo {
+    width: 100px;
+  }
+  
+  .sanskrit-text {
+    font-style: italic;
+    font-size: 14px;
+  }
+  
+  .service-banner {
+    text-align: center;
+    background: black;
+    color: white;
+    padding: 5px;
+    font-weight: bold;
+  }
+  
+  .card {
+    margin-bottom: 20px;
+  }
+  
+  .card-header {
+    font-size: 1.5rem;
+  }
+  
+  .card-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+  }
+  
+  .form-control {
+    border-radius: 0.25rem;
+    margin-bottom: 10px;
+  }
+  
+  .card-body {
+    padding: 2rem;
+  }
+  
+  button {
+    width: 150px;
+    height: 40px;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+  
+  .text-center p {
+    margin-bottom: 1rem;
+  }
+  
+  .shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+  }
+  
+  .container-fluid {
+    max-width: 1200px;
+  }
+
+  
