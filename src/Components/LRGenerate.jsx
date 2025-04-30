@@ -91,12 +91,12 @@ function LRGenerate() {
     }
 
     try {
-      const response = await axios.post(`http://127.0.0.1:8000/api/insert_lr`, data)
+      const response = await axios.post(`http://localhost:8000/api/insert_lr`, data)
       console.log('Response:', response);
       alert(response.data.message);
     } catch (error) {
       console.error('Error:', error.response ? error.response.data : error.message);
-      alert('Failed to create LR. Please try again.');
+      alert(error.response?.data?.message || 'Failed to create LR. Please try again.');
     } finally {
         setLoading(false);
     }
