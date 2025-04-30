@@ -6,6 +6,7 @@ import './LRGenerate.css';  // Custom CSS for additional styling
 import API_URL from '../../config';
 
 function LRGenerate() {
+  const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState({
     invoice_no: '',
     value_rs: '',
@@ -90,16 +91,18 @@ function LRGenerate() {
       grand_total: formData.grand_total
     }
 
-    try {
-      const response = await axios.post(`http://localhost:8000/api/insert_lr`, data)
-      console.log('Response:', response);
-      alert(response.data.message);
-    } catch (error) {
-      console.error('Error:', error.response ? error.response.data : error.message);
-      alert(error.response?.data?.message || 'Failed to create LR. Please try again.');
-    } finally {
+    axios.post(`http://localhost:8000/api/insert_lr`, data)
+      .then(response => {
+        setErrors({});
+        alert('Data submitted successfully!');
         setLoading(false);
-    }
+      })
+      .catch(error => {
+        if (error.response && error.response.status === 422) {
+          setErrors(error.response.data.errors); // Laravel validation errors
+          setLoading(false);
+        }
+      });
   };
 
   return (
@@ -135,6 +138,7 @@ function LRGenerate() {
                 <Form.Group controlId="delivery_at">
                   <Form.Label>Delivery At</Form.Label>
                   <Form.Control type="text" name="delivery_at" value={formData.delivery_at} onChange={handleChange} />
+                  {errors.delivery_at && <p className="text-red-500">{errors.delivery_at[0]}</p>}
                 </Form.Group>
               </Col>
               <Col>
