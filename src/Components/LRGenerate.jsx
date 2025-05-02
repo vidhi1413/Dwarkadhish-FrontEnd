@@ -138,13 +138,14 @@ function LRGenerate() {
                 <Form.Group controlId="delivery_at">
                   <Form.Label>Delivery At</Form.Label>
                   <Form.Control type="text" name="delivery_at" value={formData.delivery_at} onChange={handleChange} />
-                  {errors.delivery_at && <p className="text-red-500">{errors.delivery_at[0]}</p>}
+                  {errors.delivery_at && <p style={{ color: 'red', fontSize: '12px'}}>{errors.delivery_at[0]}</p>}
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group controlId="date">
                   <Form.Label>Date</Form.Label>
                   <Form.Control type="date" name="date" value={formData.date} onChange={handleChange} />
+                  {errors.date && <p style={{ color: 'red', fontSize: '12px'}}>{errors.date[0]}</p>}
                 </Form.Group>
               </Col>
             </Row>
@@ -159,10 +160,12 @@ function LRGenerate() {
                   <Form.Group controlId="consignor_gstin" className="mt-3">
                     <Form.Label>GSTIN No.</Form.Label>
                     <Form.Control type="text" name="consignor_gstin" value={formData.consignor_gstin} onChange={handleChange} />
+                    {errors.consignor_gstin_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignor_gstin_no[0]}</p>}
                   </Form.Group>
                   <Form.Group controlId="consignor_eway" className="mt-3">
                     <Form.Label>E-way Bill No.</Form.Label>
                     <Form.Control type="text" name="consignor_eway" value={formData.consignor_eway} onChange={handleChange} />
+                    {errors.consignor_eway_bill_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignor_eway_bill_no[0]}</p>}
                   </Form.Group>
                 </Card>
               </Col>
@@ -171,15 +174,19 @@ function LRGenerate() {
                 <p>The Customer has stated that, He has INSURED / NOT INSURED the Consignment</p>
                 <Form.Group controlId="insurance_company">
                   <Form.Control type="text" name="insurance_company" placeholder="Company" value={formData.insurance_company} onChange={handleChange} />
+                  {errors.insurance_company_name && <p style={{ color: 'red', fontSize: '12px'}}>{errors.insurance_company_name[0]}</p>}
                 </Form.Group>
                 <Form.Group controlId="policy_no" className="mt-3">
                   <Form.Control type="text" name="policy_no" placeholder="Policy No." value={formData.policy_no} onChange={handleChange} />
+                  {errors.policy_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.policy_no[0]}</p>}
                 </Form.Group>
                 <Form.Group controlId="amount_rs" className="mt-3">
                   <Form.Control type="text" name="amount_rs" placeholder="Amount Rs." value={formData.amount_rs} onChange={handleChange} />
+                  {errors.amount_rs && <p style={{ color: 'red', fontSize: '12px'}}>{errors.amount_rs[0]}</p>}
                 </Form.Group>
                 <Form.Group controlId="risk_rs" className="mt-3">
                   <Form.Control type="text" name="risk_rs" placeholder="Risk Rs." value={formData.risk_rs} onChange={handleChange} />
+                  {errors.risk_rs && <p style={{ color: 'red', fontSize: '12px'}}>{errors.risk_rs[0]}</p>}
                 </Form.Group>
               </Col>
               <Col>
@@ -192,10 +199,12 @@ function LRGenerate() {
                   <Form.Group controlId="consignee_gstin" className="mt-3">
                     <Form.Label>GSTIN No.</Form.Label>
                     <Form.Control type="text" name="consignee_gstin" value={formData.consignee_gstin} onChange={handleChange} />
+                    {errors.consignee_gstin_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignee_gstin_no[0]}</p>}
                   </Form.Group>
                   <Form.Group controlId="consignee_eway" className="mt-3">
                     <Form.Label>E-way Bill No.</Form.Label>
                     <Form.Control type="text" name="consignee_eway" value={formData.consignee_eway} onChange={handleChange} />
+                    {errors.consignee_eway_bill_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignee_eway_bill_no[0]}</p>}
                   </Form.Group>
                 </Card>
               </Col>
@@ -206,12 +215,14 @@ function LRGenerate() {
                 <Form.Group controlId="from">
                   <Form.Label>From</Form.Label>
                   <Form.Control type="text" name="from" value={formData.from} onChange={handleChange} />
+                  {errors.from && <p style={{ color: 'red', fontSize: '12px'}}>{errors.from[0]}</p>}
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group controlId="to">
                   <Form.Label>To</Form.Label>
                   <Form.Control type="text" name="to" value={formData.to} onChange={handleChange} />
+                  {errors.to && <p style={{ color: 'red', fontSize: '12px'}}>{errors.to[0]}</p>}
                 </Form.Group>
               </Col>
               <Col><Form.Label>Personal Liable For Paying GSTIN:</Form.Label></Col>
@@ -264,6 +275,7 @@ function LRGenerate() {
                       value={formData.packages}
                       onChange={handleChange}
                     />
+                    {errors.packages && <p style={{ color: 'red', fontSize: '12px'}}>{errors.packages[0]}</p>}
                   </td>
                   <td rowSpan="6">
                     <Form.Control
@@ -272,6 +284,7 @@ function LRGenerate() {
                       value={formData.destination}
                       onChange={handleChange}
                     />
+                    {errors.destination && <p style={{ color: 'red', fontSize: '12px'}}>{errors.destination[0]}</p>}
                   </td>
                   
                   <td rowSpan="2">
@@ -281,6 +294,7 @@ function LRGenerate() {
                       value={formData.actual_weight}
                       onChange={handleChange}
                     />
+                    {errors.actual_weight && <p style={{ color: 'red', fontSize: '12px'}}>{errors.actual_weight[0]}</p>}
                   </td>
                   <td>
                     <Form.Control
@@ -289,6 +303,7 @@ function LRGenerate() {
                       value={formData.rate_per_mt}
                       onChange={handleChange}
                     />
+                    {errors.rate_per_mt && <p style={{ color: 'red', fontSize: '12px'}}>{errors.rate_per_mt[0]}</p>}
                   </td>
                   <td></td>
                   
@@ -302,6 +317,7 @@ function LRGenerate() {
                       value={formData.bc}
                       onChange={handleChange}
                     />
+                    {errors.bc && <p style={{ color: 'red', fontSize: '12px'}}>{errors.bc[0]}</p>}
                   </td>
                   <td></td>
                 </tr>
@@ -315,6 +331,7 @@ function LRGenerate() {
                       value={formData.sgst}
                       onChange={handleChange}
                     />
+                    {errors.sgst && <p style={{ color: 'red', fontSize: '12px'}}>{errors.sgst[0]}</p>}
                   </td>
                 </tr>
                 <tr>
@@ -326,6 +343,7 @@ function LRGenerate() {
                       value={formData.cgst}
                       onChange={handleChange}
                     />
+                    {errors.cgst && <p style={{ color: 'red', fontSize: '12px'}}>{errors.cgst[0]}</p>}
                   </td>
                 </tr>
                 <tr>
@@ -338,6 +356,7 @@ function LRGenerate() {
                       value={formData.igst}
                       onChange={handleChange}
                     />
+                    {errors.igst && <p style={{ color: 'red', fontSize: '12px'}}>{errors.igst[0]}</p>}
                   </td>
                 </tr>
                 <tr>
@@ -349,6 +368,7 @@ function LRGenerate() {
                       value={formData.gc}
                       onChange={handleChange}
                     />
+                    {errors.gc && <p style={{ color: 'red', fontSize: '12px'}}>{errors.gc[0]}</p>}
                   </td>
                   <td></td>
                 </tr>
@@ -365,6 +385,7 @@ function LRGenerate() {
                       value={formData.grand_total}
                       onChange={handleChange}
                     />
+                    {errors.grand_total && <p style={{ color: 'red', fontSize: '12px'}}>{errors.grand_total[0]}</p>}
                   </td>
                 </tr>
               </tbody>
