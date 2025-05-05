@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
@@ -11,7 +13,9 @@ function App() {
     <div className="d-flex">
       <Sidebar setActiveTab={setActiveTab} />
       <MainContent activeTab={activeTab} />
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
+    
   );
 }
 

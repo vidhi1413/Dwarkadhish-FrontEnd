@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Card, Form, Button, Row, Col, Container, Table } from 'react-bootstrap';
 import { ClipLoader } from 'react-spinners';
 import './LRGenerate.css';  // Custom CSS for additional styling
+import { toast } from 'react-toastify';
 import API_URL from '../../config';
 
 function LRGenerate() {
   const [errors, setErrors] = useState({});
-  const [formData, setFormData] = useState({
+  const [loading, setLoading] = useState(false);
+  const initialFormState = {
     invoice_no: '',
     value_rs: '',
     lorry_no: '',
@@ -39,23 +41,29 @@ function LRGenerate() {
     option1: false,
     option2: false,
     option3: false,
-  });
+  };
 
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState(initialFormState);
 
+  // Fetch invoice_no and cnn_no on page load
+  useEffect(() => {
+    axios.get('http://localhost:8000/api/next-lr-numbers')
+      .then(res => {
+        setFormData(prev => ({
+          ...prev,
+          invoice_no: res.data.invoice_no,
+          cnn_no: res.data.cnn_no
+        }));
+      })
+      .catch(err => {
+        console.error("Error fetching next LR numbers:", err);
+      });
+  }, []);
+
+  // Handle input changes
   const handleChange = (e) => {
-    e.persist();
-    if (e.target.type === 'checkbox') {
-      setFormData({
-        ...formData,
-        [e.target.name]: e.target.checked,  // Handle checkbox changes correctly
-      });
-    } else {
-      setFormData({
-        ...formData,
-        [e.target.name]: e.target.value,
-      });
-    }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -63,14 +71,16 @@ function LRGenerate() {
     setLoading(true);
 
     const data = {
-      invoice_no: '102514',
-      value_rs: '50000',
-      lorry_no: '5542',
-      cnn_no: '7750',
+      invoice_no: formData.invoice_no,
+      value_rs: formData.value_rs,
+      lorry_no: formData.lorry_no,
+      cnn_no: formData.cnn_no,
       delivery_at: formData.delivery_at,
       date: formData.date,
+      consignor: formData.consignor,
       consignor_gstin_no: formData.consignor_gstin,
       consignor_eway_bill_no: formData.consignor_eway,
+      consignee: formData.consignee,
       consignee_gstin_no: formData.consignee_gstin,
       consignee_eway_bill_no: formData.consignee_eway,
       from: formData.from,
@@ -94,8 +104,9 @@ function LRGenerate() {
     axios.post(`http://localhost:8000/api/insert_lr`, data)
       .then(response => {
         setErrors({});
-        alert('Data submitted successfully!');
+        toast.success("Data submitted successfully!");
         setLoading(false);
+        resetFormAndFetchNextNumbers();
       })
       .catch(error => {
         if (error.response && error.response.status === 422) {
@@ -104,6 +115,46 @@ function LRGenerate() {
         }
       });
   };
+
+  const resetFormAndFetchNextNumbers = () => {
+    axios.get('http://localhost:8000/api/next-lr-numbers')
+      .then(res => {
+        setFormData({
+          invoice_no: res.data.invoice_no,
+          value_rs: '',
+          lorry_no: '',
+          cnn_no: res.data.cnn_no,
+          delivery_at: '',
+          date: '',
+          consignor: '',
+          consignor_gstin: '',
+          consignor_eway: '',
+          consignee: '',
+          consignee_gstin: '',
+          consignee_eway: '',
+          from: '',
+          to: '',
+          insurance_company: '',
+          policy_no: '',
+          amount_rs: '',
+          risk_rs: '',
+          packages: '',
+          destination: '',
+          actual_weight: '',
+          rate_per_mt: '',
+          bc: '',
+          sgst: '',
+          cgst: '',
+          igst: '',
+          gc: '',
+          grand_total: '',
+        });
+      })
+      .catch(err => {
+        console.error("Error resetting numbers:", err);
+      });
+  };
+  
 
   return (
     <Container fluid className="p-4">
@@ -128,10 +179,32 @@ function LRGenerate() {
         <Card.Body>
           <Form onSubmit={handleSubmit}>
             <Row className="mb-3">
+            <Col>
+                <Form.Group controlId="invoice_no">
+                  <Form.Label>Invoice No.</Form.Label>
+                  <Form.Control type="text" name="invoice_no" value={formData.invoice_no} onChange={handleChange} readOnly/>
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group controlId="value_rs">
+                  <Form.Label>Value Rs</Form.Label>
+                  <Form.Control type="text" name="value_rs" value={formData.value_rs} onChange={handleChange}/>
+                  {errors.value_rs && <p style={{ color: 'red', fontSize: '12px'}}>{errors.value_rs[0]}</p>}
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group controlId="lorry_no">
+                  <Form.Label>Lorry No.</Form.Label>
+                  <Form.Control type="text" name="lorry_no" value={formData.lorry_no} onChange={handleChange}/>
+                  {errors.lorry_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.lorry_no[0]}</p>}
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row className="mb-3">
               <Col>
                 <Form.Group controlId="cnn_no">
                   <Form.Label>C.N. No.</Form.Label>
-                  <Form.Control type="text" name="cnn_no" value={formData.cnn_no} disabled />
+                  <Form.Control type="text" name="cnn_no" value={formData.cnn_no} onChange={handleChange} readOnly/>
                 </Form.Group>
               </Col>
               <Col>
@@ -156,6 +229,7 @@ function LRGenerate() {
                   <Form.Group controlId="consignor">
                     <Form.Label>Consignor</Form.Label>
                     <Form.Control as="textarea" rows={3} name="consignor" value={formData.consignor} onChange={handleChange} />
+                    {errors.consignor && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignor[0]}</p>}
                   </Form.Group>
                   <Form.Group controlId="consignor_gstin" className="mt-3">
                     <Form.Label>GSTIN No.</Form.Label>
@@ -195,6 +269,7 @@ function LRGenerate() {
                   <Form.Group controlId="consignee">
                     <Form.Label>Consignee</Form.Label>
                     <Form.Control as="textarea" rows={3} name="consignee" value={formData.consignee} onChange={handleChange} />
+                    {errors.consignee && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignee[0]}</p>}
                   </Form.Group>
                   <Form.Group controlId="consignee_gstin" className="mt-3">
                     <Form.Label>GSTIN No.</Form.Label>
@@ -390,11 +465,13 @@ function LRGenerate() {
                 </tr>
               </tbody>
             </Table>
-            <div className="text-center mt-3">
-              <Button variant="primary" type="submit" disabled={loading}>
-                {loading ? <ClipLoader size={24} color="#fff" /> : 'Generate LR'}
-              </Button>
-            </div>
+            {loading ? (
+              <div className="text-center mb-3">
+                <ClipLoader size={35} color="#007bff" />
+              </div>
+            ) : (
+              <Button type="submit" variant="primary" style={{ display: 'block', margin: '20px auto' }}>Submit</Button>
+            )}
           </Form>
         </Card.Body>
       </Card>

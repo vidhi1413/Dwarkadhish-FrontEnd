@@ -1,18 +1,46 @@
 import React from 'react';
-import { ListGroup } from 'react-bootstrap';
+import { ListGroup, Accordion } from 'react-bootstrap';
 
 function Sidebar({ setActiveTab }) {
   return (
-    <div className="bg-dark text-white vh-auto d-flex flex-column" style={{ width: '350px', }} >
+    <div className="vh-auto d-flex flex-column" style={{ width: '350px' }}>
       <div className="sidebar-heading p-3 text-center">Dwarkadhish Dashboard</div>
-      <ListGroup variant="flush" className="flex-grow-1">
-        <ListGroup.Item action onClick={() => setActiveTab('LRGenerate')} className="bg-dark text-white">
-          LR Generate
-        </ListGroup.Item>
-        <ListGroup.Item action onClick={() => setActiveTab('Invoices')} className="bg-dark text-white">
-          Invoices
-        </ListGroup.Item>
-        <ListGroup.Item action onClick={() => setActiveTab('BankLedger')} className="bg-dark text-white">
+
+      <Accordion flush>
+        {/* LR Generate Section */}
+        <Accordion.Item eventKey="0">
+          <Accordion.Header className="bg-dark text-white">LR Generate</Accordion.Header>
+          <Accordion.Body className="p-0">
+            <ListGroup variant="flush">
+              <ListGroup.Item action onClick={() => setActiveTab('LRGenerate')}>
+                LR Generate
+              </ListGroup.Item>
+              <ListGroup.Item action onClick={() => setActiveTab('LRGenerateList')}>
+                LR Generate List
+              </ListGroup.Item>
+            </ListGroup>
+          </Accordion.Body>
+        </Accordion.Item>
+
+        {/* Invoices Section */}
+        <Accordion.Item eventKey="1">
+          <Accordion.Header className="bg-dark text-white">Invoices</Accordion.Header>
+          <Accordion.Body className="p-0">
+            <ListGroup variant="flush">
+              <ListGroup.Item action onClick={() => setActiveTab('Invoices')}>
+                Invoices
+              </ListGroup.Item>
+              <ListGroup.Item action onClick={() => setActiveTab('InvoicesList')}>
+                Invoices List
+              </ListGroup.Item>
+            </ListGroup>
+          </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
+
+      {/* Bank Ledger as separate item */}
+      <ListGroup variant="flush">
+        <ListGroup.Item action onClick={() => setActiveTab('BankLedger')}>
           Bank Ledger
         </ListGroup.Item>
       </ListGroup>
