@@ -32,6 +32,7 @@ function LRGenerate() {
     destination: '',
     actual_weight: '',
     rate_per_mt: '',
+    remarks: '',
     bc: '',
     sgst: '',
     cgst: '',
@@ -93,6 +94,7 @@ function LRGenerate() {
       destination: formData.destination,
       actual_weight: formData.actual_weight,
       rate_per_mt: formData.rate_per_mt,
+      remarks: formData.remarks,
       bc: formData.bc,
       sgst: formData.sgst,
       cgst: formData.cgst,
@@ -142,6 +144,7 @@ function LRGenerate() {
           destination: '',
           actual_weight: '',
           rate_per_mt: '',
+          remarks: '',
           bc: '',
           sgst: '',
           cgst: '',
@@ -380,8 +383,17 @@ function LRGenerate() {
                     />
                     {errors.rate_per_mt && <p style={{ color: 'red', fontSize: '12px'}}>{errors.rate_per_mt[0]}</p>}
                   </td>
-                  <td></td>
-                  
+                  <td colSPan="2"></td>
+                  <td>
+                  <Form.Control
+                    as="textarea"
+                    style={{ resize: 'none' }}
+                    name="remarks"
+                    value={formData.remarks}
+                    onChange={handleChange}
+                  />
+                    {errors.remarks && <p style={{ color: 'red', fontSize: '12px'}}>{errors.remarks[0]}</p>}
+                  </td>
                 </tr>
                 <tr>
                   <td>B.C.</td>
@@ -394,7 +406,7 @@ function LRGenerate() {
                     />
                     {errors.bc && <p style={{ color: 'red', fontSize: '12px'}}>{errors.bc[0]}</p>}
                   </td>
-                  <td></td>
+                  
                 </tr>
                 <tr>
                   <td rowSpan="2">Rate Per MT</td>

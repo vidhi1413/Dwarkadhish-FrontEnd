@@ -5,6 +5,12 @@ import './LRGenerate.css';  // Custom CSS for additional styling
 
 function Invoices() {
   const [formData, setFormData] = useState({
+    bill_to:'',
+    address:'',
+    gst_no:'',
+    branch:'',
+    invoice_no:'',
+    date:'',
     lr_no:'',
     truck_no:'',
     from_to:'',
@@ -15,6 +21,14 @@ function Invoices() {
     extra_charge:'',
     advance:'',
     trip_amount:'',
+    hsn_sac:'',
+    remarks:'',
+    sub_total:'',
+    discount:'',
+    total_trip_amount:'',
+    invoice_value:'',
+    advance_received:'',
+    net_payable:''
   });
 
   const handleChange = (e) => {
@@ -56,17 +70,46 @@ function Invoices() {
       <Card.Header className="bg-success text-white text-center">Invoice Generate</Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
+        <Row className="mb-3">
+            <Col>
+              <Form.Group controlId="bill_to">
+                <Form.Label>Bill To</Form.Label>
+                <Form.Control type="text" name="bill_to" value={formData.bill_to} onChange={handleChange}/>
+              </Form.Group>
+            </Col>
+            <Col>
+              <Form.Group controlId="address">
+                <Form.Label>Address</Form.Label>
+                <Form.Control type="text" name="address" value={formData.address} onChange={handleChange}/>
+              </Form.Group>
+            </Col>
+          </Row>
           <Row className="mb-3">
             <Col>
-              <h6>Bill	To	:	SOPPA	PROJECT	LLP	</h6>
-              <p>Address	:	MANJUSAR	GIDC	ALINDRA,	Vadodara,	Gujarat,	India	Pin	:	391775	</p>
-              <p>GST	No	:	27AETFS8602M1Z6</p>
+              <Form.Group controlId="gst_no">
+                <Form.Label>GST No.</Form.Label>
+                <Form.Control type="text" name="gst_no" value={formData.gst_no} onChange={handleChange}/>
+              </Form.Group>
             </Col>
-            <Col></Col>
             <Col>
-              <p>Date	:	09-03-2025</p>
-              <p>Invoice	Number	:	APR/24-25/2</p>
-              <p>Branch:	01</p>
+              <Form.Group controlId="branch">
+                <Form.Label>Branch</Form.Label>
+                <Form.Control type="text" name="branch" value={formData.branch} onChange={handleChange}/>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Row className="mb-3">
+            <Col>
+              <Form.Group controlId="invoice_no">
+                <Form.Label>Invoice No.</Form.Label>
+                <Form.Control type="text" name="invoice_no" value={formData.invoice_no} onChange={handleChange}/>
+              </Form.Group>
+            </Col>
+            <Col>
+              <Form.Group controlId="date">
+                <Form.Label>Date</Form.Label>
+                <Form.Control type="date" name="date" value={formData.date} onChange={handleChange}/>
+              </Form.Group>
             </Col>
           </Row>
 
@@ -169,31 +212,59 @@ function Invoices() {
                   </td>
               </tr>
               <tr>
-                <td colSpan="5">HSN	/	SAC	:</td>
+                <td colSpan="5">HSN	/	SAC	:
+                  <Form.Group controlId="hsn_sac">
+                    <Form.Control type="text" name="hsn_sac" value={formData.hsn_sac} onChange={handleChange}/>
+                  </Form.Group>
+                </td>
                 <td colSpan="3">SUB TOTAL</td>
-                <td colSpan="2">28,800.00</td>
+                <td colSpan="2"><Form.Group controlId="sub_total">
+                    <Form.Control type="text" name="sub_total" value={formData.sub_total} onChange={handleChange}/>
+                  </Form.Group></td>
               </tr>
               <tr>
-                <td colSpan="5" rowSpan="2">remarks</td>
+                <td colSpan="5" rowSpan="2">remarks
+                  <Form.Group controlId="remarks">
+                    <Form.Control type="text" name="remarks" value={formData.remarks} onChange={handleChange}/>
+                  </Form.Group></td>
                 <td colSpan="3">DISCOUNT</td>
-                <td colSpan="2">-	0.00</td>
+                <td colSpan="2">
+                  <Form.Group controlId="discount">
+                    <Form.Control type="text" name="discount" value={formData.discount} onChange={handleChange}/>
+                  </Form.Group></td>
               </tr>
               <tr>
                 <td colSpan="3"><b>TOTAL	TRIP	AMOUNT</b></td>
-                <td colSpan="2">28,800.00</td>
+                <td colSpan="2">
+                  <Form.Group controlId="total_trip_amount">
+                    <Form.Control type="text" name="total_trip_amount" value={formData.total_trip_amount} onChange={handleChange}/>
+                  </Form.Group>
+                </td>
               </tr>
               <tr>
                 <td colSpan="5" rowSpan="3">TWENTY-EIGHT	THOUSAND,	EIGHT	HUNDRED</td>
                 <td colSpan="3"><h5>INVOICE	VALUE</h5></td>
-                <td colSpan="2">28,800.00</td>
+                <td colSpan="2">
+                  <Form.Group controlId="invoice_value">
+                    <Form.Control type="text" name="invoice_value" value={formData.invoice_value} onChange={handleChange}/>
+                  </Form.Group>
+                </td>
               </tr>
               <tr>
               <td colSpan="3"><b>ADVANCE	RECEIVED</b></td>
-              <td colSpan="2">-0.00</td>
+              <td colSpan="2">
+                <Form.Group controlId="advance_received">
+                    <Form.Control type="text" name="advance_received" value={formData.advance_received} onChange={handleChange}/>
+                </Form.Group>
+              </td>
               </tr>
               <tr>
               <td colSpan="3"><b>NET	PAYABLE</b></td>
-              <td colSpan="2">28,800.00</td>
+              <td colSpan="2">
+                <Form.Group controlId="net_payable">
+                    <Form.Control type="text" name="net_payable" value={formData.net_payable} onChange={handleChange}/>
+                  </Form.Group>
+              </td>
               </tr>
             </tbody>
           </Table>
