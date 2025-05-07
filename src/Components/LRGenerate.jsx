@@ -383,7 +383,7 @@ function LRGenerate() {
                     />
                     {errors.rate_per_mt && <p style={{ color: 'red', fontSize: '12px'}}>{errors.rate_per_mt[0]}</p>}
                   </td>
-                  <td colSPan="2"></td>
+                  <td colSpan="2"></td>
                   <td>
                   <Form.Control
                     as="textarea"
