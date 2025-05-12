@@ -16,16 +16,20 @@ function Invoices() {
     branch:'',
     invoice_no:'',
     date:'',
-    lr_no:'',
-    truck_no:'',
-    from_to:'',
-    material_parcel:'',
-    total_weight:'',
-    freight_amount:'',
-    halting_charge:'',
-    extra_charge:'',
-    advance:'',
-    trip_amount:'',
+    items: [
+      {
+        lr_no:'',
+        truck_no:'',
+        from_to:'',
+        material_parcel:'',
+        total_weight:'',
+        freight_amount:'',
+        halting_charge:'',
+        extra_charge:'',
+        advance:'',
+        trip_amount:'',
+      }
+    ],
     hsn_sac:'',
     remarks:'',
     sub_total:'',
@@ -47,26 +51,106 @@ function Invoices() {
     };
   
     setFormData(updatedFormData);
+  };
+
+  const handleItemChange = (index, field, value) => {
+    const updatedItems = [...formData.items];
+    updatedItems[index][field] = value;
   
-    // Trigger calculation if relevant field changed
-    if (['trip_amount', 'discount', 'advance_received'].includes(name)) {
-      try {
-        const response = await axios.post('http://localhost:8000/api/calculate-net-payable', {
-          trip_amount: parseFloat(updatedFormData.trip_amount) || 0,
-          discount: parseFloat(updatedFormData.discount) || 0,
-          advance_received: parseFloat(updatedFormData.advance_received) || 0,
-        });
+    // Convert to float safely
+    const freight = parseFloat(updatedItems[index].freight_amount) || 0;
+    const halting = parseFloat(updatedItems[index].halting_charge) || 0;
+    const extra = parseFloat(updatedItems[index].extra_charge) || 0;
+    const advance = parseFloat(updatedItems[index].advance) || 0;
   
-        setFormData((prevData) => ({
-          ...prevData,
-          invoice_value: response.data.invoice_value,
-          net_payable: response.data.net_payable,
-        }));
-      } catch (error) {
-        console.error('Calculation error:', error.response?.data || error.message);
-      }
-    }
+    updatedItems[index].trip_amount = freight + halting + extra;
+  
+    // Recalculate subtotal
+    const updatedSubTotal = updatedItems.reduce(
+      (acc, item) => acc + (parseFloat(item.trip_amount) || 0),
+      0
+    );
+  
+    const advanceReceived = updatedItems.reduce(
+      (acc, item) => acc + (parseFloat(item.advance) || 0),
+      0
+    );
+  
+    const discount = parseFloat(formData.discount) || 0;
+    const invoiceValue = updatedSubTotal - discount;
+    const netPayable = invoiceValue - advanceReceived;
+  
+    setFormData({
+      ...formData,
+      items: updatedItems,
+      sub_total: updatedSubTotal,
+      total_trip_amount: updatedSubTotal - discount,
+      invoice_value: invoiceValue,
+      advance_received: advanceReceived,
+      net_payable: netPayable
+    });
   };  
+  
+  const handleAdvanceChange = (e) => {
+    const advanceReceived = parseFloat(e.target.value || 0);
+    const subTotal = parseFloat(formData.sub_total || 0);
+    const discount = parseFloat(formData.discount || 0);
+  
+    const invoiceValue = subTotal - discount;
+    const netPayable = invoiceValue - advanceReceived;
+  
+    setFormData({
+      ...formData,
+      advance_received: advanceReceived,
+      invoice_value: invoiceValue,
+      net_payable: netPayable,
+    });
+  };  
+  
+  const handleDiscountChange = (e) => {
+    const discount = parseFloat(e.target.value || 0);
+    const subTotal = parseFloat(formData.sub_total || 0);
+    const advanceReceived = parseFloat(formData.advance_received || 0);
+  
+    const invoiceValue = subTotal - discount;
+    const netPayable = invoiceValue - advanceReceived;
+  
+    setFormData({
+      ...formData,
+      discount: discount,
+      invoice_value: invoiceValue,
+      total_trip_amount: invoiceValue,
+      net_payable: netPayable,
+    });
+  };  
+
+  const removeItem = (index) => {
+    const updatedItems = [...formData.items];
+    updatedItems.splice(index, 1); // Removes the item at the given index
+    setFormData({ ...formData, items: updatedItems });
+  };
+  
+
+  const addItem = () => {
+    setFormData({
+      ...formData,
+      items: [
+        ...formData.items,
+        {
+          lr_no:'',
+          truck_no:'',
+          from_to:'',
+          material_parcel:'',
+          total_weight:'',
+          freight_amount:'',
+          halting_charge:'',
+          extra_charge:'',
+          advance:'',
+          trip_amount:'',
+        }
+      ]
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -79,16 +163,7 @@ function Invoices() {
       branch: formData.branch,
       invoice_no: formData.invoice_no,
       date: formData.date,
-      lr_no: formData.lr_no,
-      truck_no: formData.truck_no,
-      from_to: formData.from_to,
-      material_parcel: formData.material_parcel,
-      total_weight: formData.total_weight,
-      freight_amount: formData.freight_amount,
-      halting_charge: formData.halting_charge,
-      extra_charge: formData.extra_charge,
-      advance: formData.advance,
-      trip_amount: formData.trip_amount,
+      items: formData.items,
       hsn_sac: formData.hsn_sac,
       remarks: formData.remarks,
       sub_total: formData.sub_total,
@@ -112,33 +187,6 @@ function Invoices() {
         }
       });
   };
-
-  const fetchLRDetails = async () => {
-    try {
-      const response = await axios.get(`http://localhost:8000/api/lr-details/${formData.invoice_no}`);
-      const { lr_no, sub_total } = response.data;
-
-      setFormData((prev) => ({
-        ...prev,
-        lr_no,
-        sub_total
-      }));
-      setError('');
-    } catch (err) {
-      setFormData((prev) => ({
-        ...prev,
-        lr_no: '',
-        sub_total: ''
-      }));
-      setError('LR details not found for this Invoice No.');
-    }
-  };
-
-  useEffect(() => {
-    if (formData.invoice_no.trim() !== '') {
-      fetchLRDetails();
-    }
-  }, [formData.invoice_no]);
 
   return (
     <Container fluid className="p-4">
@@ -224,100 +272,30 @@ function Invoices() {
                 <th>Extra Charge</th>
                 <th>Advance</th>
                 <th>Trip Amount</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>
-                  <Form.Control
-                    type="text"
-                    name="lr_no"
-                    value={formData.lr_no}
-                    onChange={handleChange} readOnly
-                  />
-                  </td>
-                  <td>
-                  <Form.Control
-                    type="text"
-                    name="truck_no"
-                    value={formData.truck_no}
-                    onChange={handleChange}
-                  />
-                  {errors.truck_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.truck_no[0]}</p>}
-                  </td>
-                  <td>
-                  <Form.Control
-                    type="text"
-                    name="from_to"
-                    value={formData.from_to}
-                    onChange={handleChange}
-                  />
-                  {errors.from_to && <p style={{ color: 'red', fontSize: '12px'}}>{errors.from_to[0]}</p>}
-                  </td>
-                  <td>
-                  <Form.Control
-                    type="text"
-                    name="material_parcel"
-                    value={formData.material_parcel}
-                    onChange={handleChange}
-                  />
-                  {errors.material_parcel && <p style={{ color: 'red', fontSize: '12px'}}>{errors.material_parcel[0]}</p>}
-                  </td>
-                  <td>
-                  <Form.Control
-                    type="text"
-                    name="total_weight"
-                    value={formData.total_weight}
-                    onChange={handleChange}
-                  />
-                  {errors.total_weight && <p style={{ color: 'red', fontSize: '12px'}}>{errors.total_weight[0]}</p>}
-                  </td>
-                  <td>
-                  <Form.Control
-                    type="text"
-                    name="freight_amount"
-                    value={formData.freight_amount}
-                    onChange={handleChange}
-                  />
-                  {errors.freight_amount && <p style={{ color: 'red', fontSize: '12px'}}>{errors.freight_amount[0]}</p>}
-                  </td>
-                  <td>
-                  <Form.Control
-                    type="text"
-                    name="halting_charge"
-                    value={formData.halting_charge}
-                    onChange={handleChange}
-                  />
-                  {errors.halting_charge && <p style={{ color: 'red', fontSize: '12px'}}>{errors.halting_charge[0]}</p>}
-                  </td>
-                  <td>
-                  <Form.Control
-                    type="text"
-                    name="extra_charge"
-                    value={formData.extra_charge}
-                    onChange={handleChange}
-                  />
-                  {errors.extra_charge && <p style={{ color: 'red', fontSize: '12px'}}>{errors.extra_charge[0]}</p>}
-                  </td>
-                  <td>
-                  <Form.Control
-                    type="text"
-                    name="advance"
-                    value={formData.advance}
-                    onChange={handleChange}
-                  />
-                  {errors.advance && <p style={{ color: 'red', fontSize: '12px'}}>{errors.advance[0]}</p>}
-                  </td>
-                  <td>
-                  <Form.Control
-                    type="text"
-                    name="trip_amount"
-                    value={formData.trip_amount}
-                    onChange={handleChange}
-                  />
-                  {errors.trip_amount && <p style={{ color: 'red', fontSize: '12px'}}>{errors.trip_amount[0]}</p>}
-                  </td>
-              </tr>
+            {formData.items.map((item, index) => (
+            <tr key={index}>
+              <td><Form.Control value={item.lr_no} onChange={(e) => handleItemChange(index, 'lr_no', e.target.value)} /></td>
+              <td><Form.Control value={item.truck_no} onChange={(e) => handleItemChange(index, 'truck_no', e.target.value)} /></td>
+              <td><Form.Control value={item.from_to} onChange={(e) => handleItemChange(index, 'from_to', e.target.value)} /></td>
+              <td><Form.Control value={item.material_parcel} onChange={(e) => handleItemChange(index, 'material_parcel', e.target.value)} /></td>
+              <td><Form.Control value={item.total_weight} onChange={(e) => handleItemChange(index, 'total_weight', e.target.value)} /></td>
+              <td><Form.Control value={item.freight_amount} onChange={(e) => handleItemChange(index, 'freight_amount', e.target.value)} /></td>
+              <td><Form.Control value={item.halting_charge} onChange={(e) => handleItemChange(index, 'halting_charge', e.target.value)} /></td>
+              <td><Form.Control value={item.extra_charge} onChange={(e) => handleItemChange(index, 'extra_charge', e.target.value)} /></td>
+              <td><Form.Control value={item.advance} onChange={(e) => handleItemChange(index, 'advance', e.target.value)} /></td>
+              <td><Form.Control value={item.trip_amount} readOnly/></td>
+              <td>
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <Button variant="primary" style={{ width: '50px', height: '40px' }} onClick={addItem}>+</Button>
+                  <Button variant="danger" style={{ width: '50px', height: '40px' }} onClick={() => removeItem(index)}>-</Button>
+                </div>
+              </td>
+            </tr>
+            ))}
               <tr>
                 <td colSpan="5">HSN	/	SAC	:
                   <Form.Group controlId="hsn_sac">
@@ -327,7 +305,7 @@ function Invoices() {
                 </td>
                 <td colSpan="3">SUB TOTAL</td>
                 <td colSpan="2"><Form.Group controlId="sub_total">
-                    <Form.Control type="text" name="sub_total" value={formData.sub_total} onChange={handleChange} readOnly/>
+                    <Form.Control type="text" name="sub_total" value={formData.sub_total} readOnly/>
                   </Form.Group></td>
               </tr>
               <tr>
@@ -339,7 +317,7 @@ function Invoices() {
                 <td colSpan="3">DISCOUNT</td>
                 <td colSpan="2">
                   <Form.Group controlId="discount">
-                    <Form.Control type="text" name="discount" value={formData.discount} onChange={handleChange}/>
+                    <Form.Control type="text" name="discount" value={formData.discount} onChange={handleDiscountChange}/>
                     {errors.discount && <p style={{ color: 'red', fontSize: '12px'}}>{errors.discount[0]}</p>}
                   </Form.Group></td>
               </tr>
@@ -347,43 +325,42 @@ function Invoices() {
                 <td colSpan="3"><b>TOTAL	TRIP	AMOUNT</b></td>
                 <td colSpan="2">
                   <Form.Group controlId="total_trip_amount">
-                    <Form.Control type="text" name="total_trip_amount" value={formData.total_trip_amount} onChange={handleChange}/>
+                    <Form.Control type="text" name="total_trip_amount" value={formData.total_trip_amount} readOnly/>
                     {errors.total_trip_amount && <p style={{ color: 'red', fontSize: '12px'}}>{errors.total_trip_amount[0]}</p>}
                   </Form.Group>
                 </td>
               </tr>
               <tr>
-                <td colSpan="5" rowSpan="3">TWENTY-EIGHT	THOUSAND,	EIGHT	HUNDRED</td>
+                <td colSpan="5" rowSpan="3"></td>
                 <td colSpan="3"><h5>INVOICE	VALUE</h5></td>
                 <td colSpan="2">
                   <Form.Group controlId="invoice_value">
-                    <Form.Control type="text" name="invoice_value" value={formData.invoice_value} onChange={handleChange} readOnly/>
+                    <Form.Control type="text" name="invoice_value" value={formData.invoice_value} readOnly/>
                   </Form.Group>
                 </td>
               </tr>
               <tr>
-              <td colSpan="3"><b>ADVANCE	RECEIVED</b></td>
-              <td colSpan="2">
-                <Form.Group controlId="advance_received">
-                    <Form.Control type="text" name="advance_received" value={formData.advance_received} onChange={handleChange}/>
-                    {errors.advance_received && <p style={{ color: 'red', fontSize: '12px'}}>{errors.advance_received[0]}</p>}
-                </Form.Group>
-              </td>
+                <td colSpan="3"><b>ADVANCE	RECEIVED</b></td>
+                <td colSpan="2">
+                  <Form.Group controlId="advance_received">
+                      <Form.Control type="text" name="advance_received" value={formData.advance_received} onChange={handleAdvanceChange} readOnly/>
+                  </Form.Group>
+                </td>
               </tr>
               <tr>
-              <td colSpan="3"><b>NET	PAYABLE</b></td>
-              <td colSpan="2">
-                <Form.Group controlId="net_payable">
-                    <Form.Control type="text" name="net_payable" value={formData.net_payable} onChange={handleChange} readOnly/>
+                <td colSpan="3"><b>NET	PAYABLE</b></td>
+                <td colSpan="2">
+                  <Form.Group controlId="net_payable">
+                      <Form.Control type="text" name="net_payable" value={formData.net_payable} readOnly/>
                   </Form.Group>
-              </td>
+                </td>
               </tr>
             </tbody>
           </Table>
           <div className="text-center mt-3">
-          <Button variant="primary" type="submit">
-            Generate Invoice
-          </Button>
+            <Button variant="primary" type="submit">
+              Generate Invoice
+            </Button>
           </div>
         </Form>
       </Card.Body>
