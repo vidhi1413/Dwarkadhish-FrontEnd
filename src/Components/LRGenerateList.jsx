@@ -19,8 +19,8 @@ function LRGenerateList() {
     };
     
     return (
-        <Container fluid className="p-4">
-            <div className="header-section mb-2 p-3 bg-info text-white">
+        <Container fluid className="container">
+            <div className="header-container mb-2 main-content">
                 <Row>
                     <Col xs={8}>
                         <h5>Head Office: 308, Soham Heights, Dashrath, Dist Vadodara, Gujarat-363642</h5>
@@ -36,27 +36,27 @@ function LRGenerateList() {
                     </Col>
                 </Row>
             </div>
-            <Card className="shadow-lg mb-4">
-                <Card.Header className="bg-success text-white text-center">LR Generate List</Card.Header>
+            <Card style={{ marginLeft: '300px', marginRight: 'auto', width: '76vw' }}>
+                <Card.Header className="custom-card-header">LR Generate List</Card.Header>
             </Card>
-            <Table bordered className="mt-4">
-            <thead className="bg-light">
-                <tr>
-                    <th>Invoice No</th>
-                    <th>action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {lrList.map(item => (
-                    <tr key={item.lr_generate_no}>
-                        <td>{item.invoice_no}</td>
-                        <td>
-                            <Button variant="success" onClick={() => downloadPDF(item.invoice_no)}>
-                                Download PDF
-                            </Button>
-                        </td>
+            <Table bordered className="main-content w-76">
+                <thead className="bg-light">
+                    <tr>
+                        <th>Invoice No</th>
+                        <th>action</th>
                     </tr>
-                ))}
+                </thead>
+                <tbody>
+                    {lrList.map(item => (
+                        <tr key={item.lr_generate_no}>
+                            <td>{item.invoice_no}</td>
+                            <td>
+                                <Button variant="success" onClick={() => downloadPDF(item.invoice_no)}>
+                                    Download PDF
+                                </Button>
+                            </td>
+                        </tr>
+                    ))}
                 </tbody>
             </Table>
         </Container>

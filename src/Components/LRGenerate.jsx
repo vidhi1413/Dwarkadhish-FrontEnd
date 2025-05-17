@@ -160,8 +160,8 @@ function LRGenerate() {
   
 
   return (
-    <Container fluid className="p-4">
-      <div className="header-section mb-2 p-3 bg-info text-white">
+    <Container fluid className="container">
+      <div className="header-container main-content">
         <Row>
           <Col xs={8}>
             <h5>Head Office: 308, Soham Heights, Dashrath, Dist Vadodara, Gujarat-363642</h5>
@@ -177,9 +177,9 @@ function LRGenerate() {
           </Col>
         </Row>
       </div>
-      <Card className="shadow-lg mb-4">
-        <Card.Header className="bg-success text-white text-center">LR Generate</Card.Header>
-        <Card.Body>
+      <Card className='main-content'>
+        <Card.Header className="custom-card-header">LR Generate</Card.Header>
+        <Card.Body class="card-body">
           <Form onSubmit={handleSubmit}>
             <Row className="mb-3">
             <Col>
@@ -227,7 +227,7 @@ function LRGenerate() {
             </Row>
             <Row className="mb-3">
               <Col>
-                <Card className="p-3">
+                <Card className="bg-light p-3">
                   <Card.Title>Consignor</Card.Title>
                   <Form.Group controlId="consignor">
                     <Form.Label>Consignor</Form.Label>
@@ -267,7 +267,7 @@ function LRGenerate() {
                 </Form.Group>
               </Col>
               <Col>
-                <Card className="p-3">
+                <Card className="bg-light p-3">
                   <Card.Title>Consignee</Card.Title>
                   <Form.Group controlId="consignee">
                     <Form.Label>Consignee</Form.Label>
@@ -478,11 +478,11 @@ function LRGenerate() {
               </tbody>
             </Table>
             {loading ? (
-              <div className="text-center mb-3">
+              <div className="text-center mt-4">
                 <ClipLoader size={35} color="#007bff" />
               </div>
             ) : (
-              <Button type="submit" variant="primary" style={{ display: 'block', margin: '20px auto' }}>Submit</Button>
+              <Button className="btn my-custom-button" type="submit" variant="primary" style={{ display: 'block', margin: '20px auto' }}>Generate LR</Button>
             )}
           </Form>
         </Card.Body>

@@ -3,13 +3,13 @@ import { ListGroup, Accordion } from 'react-bootstrap';
 
 function Sidebar({ setActiveTab }) {
   return (
-    <div className="vh-auto d-flex flex-column" style={{ width: '350px' }}>
-      <div className="sidebar-heading p-3 text-center">Dwarkadhish Dashboard</div>
+    <div className="sidebar sidebar-style" style={{ width: '300px' }}>
+      <div className="sidebar p-3 text-center">Dwarkadhish Dashboard</div>
 
       <Accordion flush>
         {/* LR Generate Section */}
         <Accordion.Item eventKey="0">
-          <Accordion.Header className="bg-dark text-white">LR Generate</Accordion.Header>
+          <Accordion.Header>LR Generate</Accordion.Header>
           <Accordion.Body className="p-0">
             <ListGroup variant="flush">
               <ListGroup.Item action onClick={() => setActiveTab('LRGenerate')}>
@@ -24,7 +24,7 @@ function Sidebar({ setActiveTab }) {
 
         {/* Invoices Section */}
         <Accordion.Item eventKey="1">
-          <Accordion.Header className="bg-dark text-white">Invoices</Accordion.Header>
+          <Accordion.Header>Invoices</Accordion.Header>
           <Accordion.Body className="p-0">
             <ListGroup variant="flush">
               <ListGroup.Item action onClick={() => setActiveTab('Invoices')}>

@@ -6,31 +6,6 @@ import './LRGenerate.css';  // Custom CSS for additional styling
 function InvoicesList() {
     const [invoices, setInvoices] = useState([]);
 
-    // useEffect(() => {
-    //     axios.get('http://localhost:8000/api/invoices')  // Update to your actual endpoint
-    //         .then(response => {
-    //             setInvoices(response.data);
-    //         })
-    //         .catch(error => {
-    //             console.error("Error fetching invoices", error);
-    //         });
-    // }, []);
-
-    // const handleDownload = (invoiceNo) => {
-    //     axios({
-    //         url: `http://localhost:8000/api/invoices/pdf/${invoiceNo}`,  // Laravel route
-    //         method: 'GET',
-    //         responseType: 'blob', // important for file download
-    //     }).then(response => {
-    //         const url = window.URL.createObjectURL(new Blob([response.data]));
-    //         const link = document.createElement('a');
-    //         link.href = url;
-    //         link.setAttribute('download', `Invoice-${invoiceNo}.pdf`);
-    //         document.body.appendChild(link);
-    //         link.click();
-    //         link.remove();
-    //     });
-    // };
     useEffect(() => {
         axios.get('http://localhost:8000/api/invoices')
             .then(res => setInvoices(res.data))
@@ -42,8 +17,8 @@ function InvoicesList() {
     };
 
     return (
-        <Container fluid className="p-4">
-            <div className="header-section mb-2 p-3 bg-info text-white">
+        <Container fluid className="container">
+            <div className="header-container mb-2 p-3 main-content">
                 <Row>
                     <Col xs={8}>
                         <h5>Head Office: 308, Soham Heights, Dashrath, Dist Vadodara, Gujarat-363642</h5>
@@ -59,10 +34,10 @@ function InvoicesList() {
                     </Col>
                 </Row>
             </div>
-            <Card className="shadow-lg mb-4">
-                <Card.Header className="bg-success text-white text-center">Invoices List</Card.Header>
+            <Card style={{ marginLeft: '300px', marginRight: 'auto', width: '76vw' }}>
+                <Card.Header className="custom-card-header">Invoices List</Card.Header>
             </Card>
-            <Table bordered className="mt-4">
+            <Table bordered className="main-content w-70">
                 <thead className="bg-light">
                     <tr>
                         <th>Invoice No</th>

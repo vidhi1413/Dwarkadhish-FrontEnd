@@ -189,8 +189,8 @@ function Invoices() {
   };
 
   return (
-    <Container fluid className="p-4">
-      <div className="header-section mb-2 p-3 bg-info text-white">
+    <Container fluid className="container">
+      <div className="header-container mb-2 p-3 main-content">
         <Row>
           <Col xs={8}>
             <h5>Head Office: 308, Soham Heights, Dashrath, Dist Vadodara, Gujarat-363642</h5>
@@ -206,8 +206,8 @@ function Invoices() {
           </Col>
         </Row>
       </div>
-    <Card>
-      <Card.Header className="bg-success text-white text-center">Invoice Generate</Card.Header>
+    <Card className='main-content'>
+      <Card.Header className="custom-card-header">Invoice Generate</Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit}>
         <Row className="mb-3">
@@ -358,7 +358,7 @@ function Invoices() {
             </tbody>
           </Table>
           <div className="text-center mt-3">
-            <Button variant="primary" type="submit">
+            <Button className="btn my-custom-button" variant="primary" type="submit">
               Generate Invoice
             </Button>
           </div>

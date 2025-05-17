@@ -1,11 +1,21 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.main-content {
+  max-width: 1900px;
+  margin-left: 300px; /* Adjust if your sidebar is wider */
+  margin-right: auto;
+  width: 76vw;
+}
+
 .header-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
     padding: 10px;
     border-bottom: 2px solid black;
-    background: #17a2b8; /* Changed header background color */
-    color: white; /* Changed text color to white */
+    background: #2f446b; /* Changed header background color */
+    color: #FFD700; /* Changed text color to white */
   }
   
   .header-left,
@@ -22,7 +32,7 @@
   }
   
   .logo {
-    width: 80px;
+    width: 150px;
   }
   
   .truck-logo {
@@ -45,15 +55,17 @@
   .card {
     margin-bottom: 20px;
   }
-  
-  .card-header {
-    font-size: 1.5rem;
-  }
-  
-  .card-title {
-    font-size: 1.2rem;
-    margin-bottom: 15px;
-  }
+
+/* More specific selector */
+.custom-card-header.card-header {
+  background: #4c8d4c;
+  color: white;
+  font-weight: bold;
+  font-size: 1.25rem;
+  text-align: center;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 2px solid #FFD700;
+}
   
   .form-control {
     border-radius: 0.25rem;
@@ -63,13 +75,56 @@
   .card-body {
     padding: 2rem;
   }
-  
-  button {
-    width: 150px;
-    height: 40px;
-    font-size: 1rem;
-    font-weight: bold;
-  }
+
+button:hover {
+  background-color: #2f446b;
+  color: #FFD700;
+  cursor: pointer;
+  font-weight: bold;
+  border: 2px solid #FFD700;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+}
+
+/* More specific: targets Bootstrap button with your custom class */
+.btn.my-custom-button:hover {
+  background-color: #2f446b !important;
+  color: #FFD700 !important;
+  border: 2px solid #FFD700 !important;
+  font-weight: bold;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  transition: all 0.3s ease;
+}
+
+.sidebar,
+.sidebar .accordion,
+.sidebar .list-group,
+.sidebar .list-group-item,
+.sidebar .accordion-item,
+.sidebar .accordion-header,
+.sidebar .accordion-button {
+  background-color: #2f446b !important;
+  color: #FFD700 !important;
+  border: none !important;
+}
+
+.sidebar-style {
+  height: 95vh;
+  padding: 1rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 1rem;
+}
+
+.sidebar .list-group-item.active,
+.sidebar .list-group-item:active,
+.sidebar .list-group-item:hover {
+  background-color: #FFD700 !important;
+  color: #2f446b !important;
+}
   
   .text-center p {
     margin-bottom: 1rem;
