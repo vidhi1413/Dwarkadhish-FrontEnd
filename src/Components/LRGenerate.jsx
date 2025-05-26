@@ -37,11 +37,14 @@ function LRGenerate() {
     sgst: '',
     cgst: '',
     igst: '',
+    sgst_amount: '',
+    cgst_amount: '',
+    igst_amount: '',
     gc: '',
     grand_total: '',
-    option1: false,
-    option2: false,
-    option3: false,
+    gst_payer_consignor: false,
+    gst_payer_consignee: false,
+    gst_payer_goods_transport: false,
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -61,15 +64,71 @@ function LRGenerate() {
       });
   }, []);
 
+  // Auto-calculate BC
+  useEffect(() => {
+    const weight = parseFloat(formData.actual_weight) || 0;
+    const rate = parseFloat(formData.rate_per_mt) || 0;
+    const bc = weight * rate;
+    setFormData(prev => ({
+      ...prev,
+      bc: bc ? bc.toFixed(2) : ''
+    }));
+  }, [formData.actual_weight, formData.rate_per_mt]);
+
+  // Auto-calculate GST fields
+  useEffect(() => {
+    const bc = parseFloat(formData.bc) || 0;
+    const sgst = parseFloat(formData.sgst) || 0;
+    const cgst = parseFloat(formData.cgst) || 0;
+    const igst = parseFloat(formData.igst) || 0;
+
+    setFormData(prev => ({
+      ...prev,
+      sgst_amount: bc && sgst ? ((bc * sgst) / 100).toFixed(2) : '',
+      cgst_amount: bc && cgst ? ((bc * cgst) / 100).toFixed(2) : '',
+      igst_amount: bc && igst ? ((bc * igst) / 100).toFixed(2) : '',
+    }));
+  }, [formData.bc, formData.sgst, formData.cgst, formData.igst]);
+
+  // Auto-calculate Grand Total (bc + all GST amounts)
+  useEffect(() => {
+    const bc = parseFloat(formData.bc) || 0;
+    const sgst = parseFloat(formData.sgst_amount) || 0;
+    const cgst = parseFloat(formData.cgst_amount) || 0;
+    const igst = parseFloat(formData.igst_amount) || 0;
+    const grandTotal = bc + sgst + cgst + igst;
+    setFormData(prev => ({
+      ...prev,
+      grand_total: grandTotal ? grandTotal.toFixed(2) : ''
+    }));
+  }, [formData.bc, formData.sgst_amount, formData.cgst_amount, formData.igst_amount]);
+
   // Handle input changes
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, type, value, checked } = e.target;
+    if (type === 'checkbox') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: checked
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
+    // Combine selected options into a single string
+    const selectedOptions = [
+      formData.gst_payer_consignor ? 'consignor' : null,
+      formData.gst_payer_consignee ? 'consignee' : null,
+      formData.gst_payer_goods_transport ? 'goods_transport' : null,
+    ].filter(Boolean).join(',');
 
     const data = {
       invoice_no: formData.invoice_no,
@@ -90,6 +149,7 @@ function LRGenerate() {
       policy_no: formData.policy_no,
       amount_rs: formData.amount_rs,
       risk_rs: formData.risk_rs,
+      gst_payer: selectedOptions, // Combine selected options
       packages: formData.packages,
       destination: formData.destination,
       actual_weight: formData.actual_weight,
@@ -140,6 +200,9 @@ function LRGenerate() {
           policy_no: '',
           amount_rs: '',
           risk_rs: '',
+          gst_payer_consignor: false,
+          gst_payer_consignee: false,
+          gst_payer_goods_transport: false,
           packages: '',
           destination: '',
           actual_weight: '',
@@ -157,7 +220,6 @@ function LRGenerate() {
         console.error("Error resetting numbers:", err);
       });
   };
-  
 
   return (
     <Container fluid className="container">
@@ -192,14 +254,14 @@ function LRGenerate() {
                 <Form.Group controlId="value_rs">
                   <Form.Label>Value Rs</Form.Label>
                   <Form.Control type="text" name="value_rs" value={formData.value_rs} onChange={handleChange}/>
-                  {errors.value_rs && <p style={{ color: 'red', fontSize: '12px'}}>{errors.value_rs[0]}</p>}
+                  {/* {errors.value_rs && <p style={{ color: 'red', fontSize: '12px'}}>{errors.value_rs[0]}</p>} */}
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group controlId="lorry_no">
                   <Form.Label>Lorry No.</Form.Label>
                   <Form.Control type="text" name="lorry_no" value={formData.lorry_no} onChange={handleChange}/>
-                  {errors.lorry_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.lorry_no[0]}</p>}
+                  {/* {errors.lorry_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.lorry_no[0]}</p>} */}
                 </Form.Group>
               </Col>
             </Row>
@@ -214,14 +276,14 @@ function LRGenerate() {
                 <Form.Group controlId="delivery_at">
                   <Form.Label>Delivery At</Form.Label>
                   <Form.Control type="text" name="delivery_at" value={formData.delivery_at} onChange={handleChange} />
-                  {errors.delivery_at && <p style={{ color: 'red', fontSize: '12px'}}>{errors.delivery_at[0]}</p>}
+                  {/* {errors.delivery_at && <p style={{ color: 'red', fontSize: '12px'}}>{errors.delivery_at[0]}</p>} */}
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group controlId="date">
                   <Form.Label>Date</Form.Label>
                   <Form.Control type="date" name="date" value={formData.date} onChange={handleChange} />
-                  {errors.date && <p style={{ color: 'red', fontSize: '12px'}}>{errors.date[0]}</p>}
+                  {/* {errors.date && <p style={{ color: 'red', fontSize: '12px'}}>{errors.date[0]}</p>} */}
                 </Form.Group>
               </Col>
             </Row>
@@ -232,17 +294,17 @@ function LRGenerate() {
                   <Form.Group controlId="consignor">
                     <Form.Label>Consignor</Form.Label>
                     <Form.Control as="textarea" rows={3} name="consignor" value={formData.consignor} onChange={handleChange} />
-                    {errors.consignor && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignor[0]}</p>}
+                    {/* {errors.consignor && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignor[0]}</p>} */}
                   </Form.Group>
                   <Form.Group controlId="consignor_gstin" className="mt-3">
                     <Form.Label>GSTIN No.</Form.Label>
                     <Form.Control type="text" name="consignor_gstin" value={formData.consignor_gstin} onChange={handleChange} />
-                    {errors.consignor_gstin_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignor_gstin_no[0]}</p>}
+                    {/* {errors.consignor_gstin_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignor_gstin_no[0]}</p>} */}
                   </Form.Group>
                   <Form.Group controlId="consignor_eway" className="mt-3">
                     <Form.Label>E-way Bill No.</Form.Label>
                     <Form.Control type="text" name="consignor_eway" value={formData.consignor_eway} onChange={handleChange} />
-                    {errors.consignor_eway_bill_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignor_eway_bill_no[0]}</p>}
+                    {/* {errors.consignor_eway_bill_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignor_eway_bill_no[0]}</p>} */}
                   </Form.Group>
                 </Card>
               </Col>
@@ -251,19 +313,19 @@ function LRGenerate() {
                 <p>The Customer has stated that, He has INSURED / NOT INSURED the Consignment</p>
                 <Form.Group controlId="insurance_company">
                   <Form.Control type="text" name="insurance_company" placeholder="Company" value={formData.insurance_company} onChange={handleChange} />
-                  {errors.insurance_company_name && <p style={{ color: 'red', fontSize: '12px'}}>{errors.insurance_company_name[0]}</p>}
+                  {/* {errors.insurance_company_name && <p style={{ color: 'red', fontSize: '12px'}}>{errors.insurance_company_name[0]}</p>} */}
                 </Form.Group>
                 <Form.Group controlId="policy_no" className="mt-3">
                   <Form.Control type="text" name="policy_no" placeholder="Policy No." value={formData.policy_no} onChange={handleChange} />
-                  {errors.policy_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.policy_no[0]}</p>}
+                  {/* {errors.policy_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.policy_no[0]}</p>} */}
                 </Form.Group>
                 <Form.Group controlId="amount_rs" className="mt-3">
                   <Form.Control type="text" name="amount_rs" placeholder="Amount Rs." value={formData.amount_rs} onChange={handleChange} />
-                  {errors.amount_rs && <p style={{ color: 'red', fontSize: '12px'}}>{errors.amount_rs[0]}</p>}
+                  {/* {errors.amount_rs && <p style={{ color: 'red', fontSize: '12px'}}>{errors.amount_rs[0]}</p>} */}
                 </Form.Group>
                 <Form.Group controlId="risk_rs" className="mt-3">
                   <Form.Control type="text" name="risk_rs" placeholder="Risk Rs." value={formData.risk_rs} onChange={handleChange} />
-                  {errors.risk_rs && <p style={{ color: 'red', fontSize: '12px'}}>{errors.risk_rs[0]}</p>}
+                  {/* {errors.risk_rs && <p style={{ color: 'red', fontSize: '12px'}}>{errors.risk_rs[0]}</p>} */}
                 </Form.Group>
               </Col>
               <Col>
@@ -272,17 +334,17 @@ function LRGenerate() {
                   <Form.Group controlId="consignee">
                     <Form.Label>Consignee</Form.Label>
                     <Form.Control as="textarea" rows={3} name="consignee" value={formData.consignee} onChange={handleChange} />
-                    {errors.consignee && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignee[0]}</p>}
+                    {/* {errors.consignee && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignee[0]}</p>} */}
                   </Form.Group>
                   <Form.Group controlId="consignee_gstin" className="mt-3">
                     <Form.Label>GSTIN No.</Form.Label>
                     <Form.Control type="text" name="consignee_gstin" value={formData.consignee_gstin} onChange={handleChange} />
-                    {errors.consignee_gstin_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignee_gstin_no[0]}</p>}
+                    {/* {errors.consignee_gstin_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignee_gstin_no[0]}</p>} */}
                   </Form.Group>
                   <Form.Group controlId="consignee_eway" className="mt-3">
                     <Form.Label>E-way Bill No.</Form.Label>
                     <Form.Control type="text" name="consignee_eway" value={formData.consignee_eway} onChange={handleChange} />
-                    {errors.consignee_eway_bill_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignee_eway_bill_no[0]}</p>}
+                    {/* {errors.consignee_eway_bill_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.consignee_eway_bill_no[0]}</p>} */}
                   </Form.Group>
                 </Card>
               </Col>
@@ -293,41 +355,44 @@ function LRGenerate() {
                 <Form.Group controlId="from">
                   <Form.Label>From</Form.Label>
                   <Form.Control type="text" name="from" value={formData.from} onChange={handleChange} />
-                  {errors.from && <p style={{ color: 'red', fontSize: '12px'}}>{errors.from[0]}</p>}
+                  {/* {errors.from && <p style={{ color: 'red', fontSize: '12px'}}>{errors.from[0]}</p>} */}
                 </Form.Group>
               </Col>
               <Col>
                 <Form.Group controlId="to">
                   <Form.Label>To</Form.Label>
                   <Form.Control type="text" name="to" value={formData.to} onChange={handleChange} />
-                  {errors.to && <p style={{ color: 'red', fontSize: '12px'}}>{errors.to[0]}</p>}
+                  {/* {errors.to && <p style={{ color: 'red', fontSize: '12px'}}>{errors.to[0]}</p>} */}
                 </Form.Group>
               </Col>
               <Col><Form.Label>Personal Liable For Paying GSTIN:</Form.Label></Col>
               <Col>
-                <Form.Label>Consignor</Form.Label>
+                <Form.Label>Option 1</Form.Label>
                 <Form.Check
                   type="checkbox"
-                  label="Option 1"
-                  name="option1"
+                  label="Consignor"
+                  name="gst_payer_consignor"
+                  checked={formData.gst_payer_consignor}
                   onChange={handleChange}
                 />
               </Col>
               <Col>
-                <Form.Label>Consignee</Form.Label>
+                <Form.Label>Option 2</Form.Label>
                 <Form.Check
                   type="checkbox"
-                  label="Option 2"
-                  name="option2"
+                  label="Consignee"
+                  name="gst_payer_consignee"
+                  checked={formData.gst_payer_consignee}
                   onChange={handleChange}
                 />
               </Col>
               <Col>
-                <Form.Label>Goods Transport AG.</Form.Label>
+                <Form.Label>Option 3</Form.Label>
                 <Form.Check
                   type="checkbox"
-                  label="Option 3"
-                  name="option3"
+                  label="Goods Transport AG."
+                  name="gst_payer_goods_transport"
+                  checked={formData.gst_payer_goods_transport}
                   onChange={handleChange}
                 />
               </Col>
@@ -353,7 +418,7 @@ function LRGenerate() {
                       value={formData.packages}
                       onChange={handleChange}
                     />
-                    {errors.packages && <p style={{ color: 'red', fontSize: '12px'}}>{errors.packages[0]}</p>}
+                    {/* {errors.packages && <p style={{ color: 'red', fontSize: '12px'}}>{errors.packages[0]}</p>} */}
                   </td>
                   <td rowSpan="6">
                     <Form.Control
@@ -362,7 +427,7 @@ function LRGenerate() {
                       value={formData.destination}
                       onChange={handleChange}
                     />
-                    {errors.destination && <p style={{ color: 'red', fontSize: '12px'}}>{errors.destination[0]}</p>}
+                    {/* {errors.destination && <p style={{ color: 'red', fontSize: '12px'}}>{errors.destination[0]}</p>} */}
                   </td>
                   
                   <td rowSpan="2">
@@ -372,7 +437,7 @@ function LRGenerate() {
                       value={formData.actual_weight}
                       onChange={handleChange}
                     />
-                    {errors.actual_weight && <p style={{ color: 'red', fontSize: '12px'}}>{errors.actual_weight[0]}</p>}
+                    {/* {errors.actual_weight && <p style={{ color: 'red', fontSize: '12px'}}>{errors.actual_weight[0]}</p>} */}
                   </td>
                   <td>
                     <Form.Control
@@ -381,7 +446,7 @@ function LRGenerate() {
                       value={formData.rate_per_mt}
                       onChange={handleChange}
                     />
-                    {errors.rate_per_mt && <p style={{ color: 'red', fontSize: '12px'}}>{errors.rate_per_mt[0]}</p>}
+                    {/* {errors.rate_per_mt && <p style={{ color: 'red', fontSize: '12px'}}>{errors.rate_per_mt[0]}</p>} */}
                   </td>
                   <td colSpan="2"></td>
                   <td>
@@ -392,7 +457,7 @@ function LRGenerate() {
                     value={formData.remarks}
                     onChange={handleChange}
                   />
-                    {errors.remarks && <p style={{ color: 'red', fontSize: '12px'}}>{errors.remarks[0]}</p>}
+                    {/* {errors.remarks && <p style={{ color: 'red', fontSize: '12px'}}>{errors.remarks[0]}</p>} */}
                   </td>
                 </tr>
                 <tr>
@@ -403,8 +468,8 @@ function LRGenerate() {
                       name="bc"
                       value={formData.bc}
                       onChange={handleChange}
+                      readOnly
                     />
-                    {errors.bc && <p style={{ color: 'red', fontSize: '12px'}}>{errors.bc[0]}</p>}
                   </td>
                   
                 </tr>
@@ -418,7 +483,8 @@ function LRGenerate() {
                       value={formData.sgst}
                       onChange={handleChange}
                     />
-                    {errors.sgst && <p style={{ color: 'red', fontSize: '12px'}}>{errors.sgst[0]}</p>}
+                    <Form.Text>SGST Amount: {formData.sgst_amount}</Form.Text>
+                    {/* {errors.sgst && <p style={{ color: 'red', fontSize: '12px'}}>{errors.sgst[0]}</p>} */}
                   </td>
                 </tr>
                 <tr>
@@ -430,7 +496,8 @@ function LRGenerate() {
                       value={formData.cgst}
                       onChange={handleChange}
                     />
-                    {errors.cgst && <p style={{ color: 'red', fontSize: '12px'}}>{errors.cgst[0]}</p>}
+                    <Form.Text>CGST Amount: {formData.cgst_amount}</Form.Text>
+                    {/* {errors.cgst && <p style={{ color: 'red', fontSize: '12px'}}>{errors.cgst[0]}</p>} */}
                   </td>
                 </tr>
                 <tr>
@@ -443,7 +510,8 @@ function LRGenerate() {
                       value={formData.igst}
                       onChange={handleChange}
                     />
-                    {errors.igst && <p style={{ color: 'red', fontSize: '12px'}}>{errors.igst[0]}</p>}
+                    <Form.Text>IGST Amount: {formData.igst_amount}</Form.Text>
+                    {/* {errors.igst && <p style={{ color: 'red', fontSize: '12px'}}>{errors.igst[0]}</p>} */}
                   </td>
                 </tr>
                 <tr>
@@ -454,8 +522,9 @@ function LRGenerate() {
                       name="gc"
                       value={formData.gc}
                       onChange={handleChange}
+                    
                     />
-                    {errors.gc && <p style={{ color: 'red', fontSize: '12px'}}>{errors.gc[0]}</p>}
+                    {/* {errors.gc && <p style={{ color: 'red', fontSize: '12px'}}>{errors.gc[0]}</p>} */}
                   </td>
                   <td></td>
                 </tr>
@@ -471,8 +540,9 @@ function LRGenerate() {
                       name="grand_total"
                       value={formData.grand_total}
                       onChange={handleChange}
+                      readOnly
                     />
-                    {errors.grand_total && <p style={{ color: 'red', fontSize: '12px'}}>{errors.grand_total[0]}</p>}
+                    {/* {errors.grand_total && <p style={{ color: 'red', fontSize: '12px'}}>{errors.grand_total[0]}</p>} */}
                   </td>
                 </tr>
               </tbody>

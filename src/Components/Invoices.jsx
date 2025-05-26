@@ -152,6 +152,34 @@ function Invoices() {
     });
   };
 
+  const fetchLRDetails = async (invoiceNo) => {
+    console.log('Fetching LR for Invoice No:', invoiceNo);
+    if (!invoiceNo) return;
+    try {
+      const res = await axios.get(`http://localhost:8000/api/lr-details/${invoiceNo}`);
+      console.log('API response:', res.data);
+
+      // Update the first item in the items array
+      const updatedItems = [...formData.items];
+      updatedItems[0] = {
+        ...updatedItems[0],
+        truck_no: res.data.truck_no || '',
+        from_to: res.data.from_to || '',
+        total_weight: res.data.total_weight || '',
+        // Optionally set lr_no if your API returns it
+        lr_no: res.data.lr_no || updatedItems[0].lr_no,
+      };
+
+      setFormData({
+        ...formData,
+        items: updatedItems,
+      });
+    } catch (err) {
+      console.log('API error:', err);
+      toast.error('LR details not found for this Invoice No');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -246,7 +274,10 @@ function Invoices() {
             <Col>
               <Form.Group controlId="invoice_no">
                 <Form.Label>Invoice No.</Form.Label>
-                <Form.Control type="text" name="invoice_no" value={formData.invoice_no} onChange={handleChange}/>
+                <Form.Control type="text" name="invoice_no" value={formData.invoice_no} 
+                onChange={handleChange}
+                onBlur={e => fetchLRDetails(e.target.value)}
+                />
                 {errors.invoice_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.invoice_no[0]}</p>}
               </Form.Group>
             </Col>
@@ -279,10 +310,10 @@ function Invoices() {
             {formData.items.map((item, index) => (
             <tr key={index}>
               <td><Form.Control value={item.lr_no} onChange={(e) => handleItemChange(index, 'lr_no', e.target.value)} /></td>
-              <td><Form.Control value={item.truck_no} onChange={(e) => handleItemChange(index, 'truck_no', e.target.value)} /></td>
-              <td><Form.Control value={item.from_to} onChange={(e) => handleItemChange(index, 'from_to', e.target.value)} /></td>
+              <td><Form.Control value={item.truck_no} onChange={(e) => handleItemChange(index, 'truck_no', e.target.value)} readOnly/></td>
+              <td><Form.Control value={item.from_to} onChange={(e) => handleItemChange(index, 'from_to', e.target.value)} readOnly/></td>
               <td><Form.Control value={item.material_parcel} onChange={(e) => handleItemChange(index, 'material_parcel', e.target.value)} /></td>
-              <td><Form.Control value={item.total_weight} onChange={(e) => handleItemChange(index, 'total_weight', e.target.value)} /></td>
+              <td><Form.Control value={item.total_weight} onChange={(e) => handleItemChange(index, 'total_weight', e.target.value)} readOnly/></td>
               <td><Form.Control value={item.freight_amount} onChange={(e) => handleItemChange(index, 'freight_amount', e.target.value)} /></td>
               <td><Form.Control value={item.halting_charge} onChange={(e) => handleItemChange(index, 'halting_charge', e.target.value)} /></td>
               <td><Form.Control value={item.extra_charge} onChange={(e) => handleItemChange(index, 'extra_charge', e.target.value)} /></td>
