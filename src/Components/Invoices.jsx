@@ -54,42 +54,44 @@ function Invoices() {
   };
 
   const handleItemChange = (index, field, value) => {
-    const updatedItems = [...formData.items];
-    updatedItems[index][field] = value;
-  
-    // Convert to float safely
-    const freight = parseFloat(updatedItems[index].freight_amount) || 0;
-    const halting = parseFloat(updatedItems[index].halting_charge) || 0;
-    const extra = parseFloat(updatedItems[index].extra_charge) || 0;
-    const advance = parseFloat(updatedItems[index].advance) || 0;
-  
-    updatedItems[index].trip_amount = freight + halting + extra;
-  
-    // Recalculate subtotal
-    const updatedSubTotal = updatedItems.reduce(
-      (acc, item) => acc + (parseFloat(item.trip_amount) || 0),
-      0
-    );
-  
-    const advanceReceived = updatedItems.reduce(
-      (acc, item) => acc + (parseFloat(item.advance) || 0),
-      0
-    );
-  
-    const discount = parseFloat(formData.discount) || 0;
-    const invoiceValue = updatedSubTotal - discount;
-    const netPayable = invoiceValue - advanceReceived;
-  
-    setFormData({
-      ...formData,
-      items: updatedItems,
-      sub_total: updatedSubTotal,
-      total_trip_amount: updatedSubTotal - discount,
-      invoice_value: invoiceValue,
-      advance_received: advanceReceived,
-      net_payable: netPayable
+    setFormData(prevFormData => {
+      const updatedItems = [...prevFormData.items];
+      updatedItems[index][field] = value;
+
+      // Convert to float safely
+      const freight = parseFloat(updatedItems[index].freight_amount) || 0;
+      const halting = parseFloat(updatedItems[index].halting_charge) || 0;
+      const extra = parseFloat(updatedItems[index].extra_charge) || 0;
+      const advance = parseFloat(updatedItems[index].advance) || 0;
+
+      updatedItems[index].trip_amount = freight + halting + extra;
+
+      // Recalculate subtotal
+      const updatedSubTotal = updatedItems.reduce(
+        (acc, item) => acc + (parseFloat(item.trip_amount) || 0),
+        0
+      );
+
+      const advanceReceived = updatedItems.reduce(
+        (acc, item) => acc + (parseFloat(item.advance) || 0),
+        0
+      );
+
+      const discount = parseFloat(prevFormData.discount) || 0;
+      const invoiceValue = updatedSubTotal - discount;
+      const netPayable = invoiceValue - advanceReceived;
+
+      return {
+        ...prevFormData,
+        items: updatedItems,
+        sub_total: updatedSubTotal,
+        total_trip_amount: updatedSubTotal - discount,
+        invoice_value: invoiceValue,
+        advance_received: advanceReceived,
+        net_payable: netPayable
+      };
     });
-  };  
+  };
   
   const handleAdvanceChange = (e) => {
     const advanceReceived = parseFloat(e.target.value || 0);
@@ -108,16 +110,18 @@ function Invoices() {
   };  
   
   const handleDiscountChange = (e) => {
-    const discount = parseFloat(e.target.value || 0);
+    const discountPercent = parseFloat(e.target.value || 0);
     const subTotal = parseFloat(formData.sub_total || 0);
     const advanceReceived = parseFloat(formData.advance_received || 0);
   
-    const invoiceValue = subTotal - discount;
+    // Calculate discount as a percentage of subtotal
+    const discountAmount = (subTotal * discountPercent) / 100;
+    const invoiceValue = subTotal - discountAmount;
     const netPayable = invoiceValue - advanceReceived;
   
     setFormData({
       ...formData,
-      discount: discount,
+      discount: discountPercent,
       invoice_value: invoiceValue,
       total_trip_amount: invoiceValue,
       net_payable: netPayable,
@@ -152,31 +156,52 @@ function Invoices() {
     });
   };
 
-  const fetchLRDetails = async (invoiceNo) => {
-    console.log('Fetching LR for Invoice No:', invoiceNo);
-    if (!invoiceNo) return;
+  const fetchLRDetailsForItem = async (lrNo, index) => {
+    if (!lrNo) return;
     try {
-      const res = await axios.get(`http://localhost:8000/api/lr-details/${invoiceNo}`);
-      console.log('API response:', res.data);
+      const res = await axios.get(`http://localhost:8000/api/lr-details/${lrNo}`);
+      console.log('LR API Response:', res.data);
+      setFormData(prevFormData => {
+        const updatedItems = [...prevFormData.items];
+        updatedItems[index] = {
+          ...updatedItems[index],
+          lr_no: res.data.lr_generate_no || lrNo,
+          truck_no: res.data.truck_no || '',
+          from_to: res.data.from_to || '',
+          total_weight: res.data.total_weight || '',
+        };
 
-      // Update the first item in the items array
-      const updatedItems = [...formData.items];
-      updatedItems[0] = {
-        ...updatedItems[0],
-        truck_no: res.data.truck_no || '',
-        from_to: res.data.from_to || '',
-        total_weight: res.data.total_weight || '',
-        // Optionally set lr_no if your API returns it
-        lr_no: res.data.lr_no || updatedItems[0].lr_no,
-      };
+        // Recalculate trip_amount for this item
+        const freight = parseFloat(updatedItems[index].freight_amount) || 0;
+        const halting = parseFloat(updatedItems[index].halting_charge) || 0;
+        const extra = parseFloat(updatedItems[index].extra_charge) || 0;
+        updatedItems[index].trip_amount = freight + halting + extra;
 
-      setFormData({
-        ...formData,
-        items: updatedItems,
+        // Recalculate subtotal and other totals
+        const updatedSubTotal = updatedItems.reduce(
+          (acc, item) => acc + (parseFloat(item.trip_amount) || 0),
+          0
+        );
+        const advanceReceived = updatedItems.reduce(
+          (acc, item) => acc + (parseFloat(item.advance) || 0),
+          0
+        );
+        const discount = parseFloat(prevFormData.discount) || 0;
+        const invoiceValue = updatedSubTotal - discount;
+        const netPayable = invoiceValue - advanceReceived;
+
+        return {
+          ...prevFormData,
+          items: updatedItems,
+          sub_total: updatedSubTotal,
+          total_trip_amount: updatedSubTotal - discount,
+          invoice_value: invoiceValue,
+          advance_received: advanceReceived,
+          net_payable: netPayable
+        };
       });
     } catch (err) {
-      console.log('API error:', err);
-      toast.error('LR details not found for this Invoice No');
+      toast.error('LR details not found for this LR No');
     }
   };
 
@@ -243,14 +268,14 @@ function Invoices() {
               <Form.Group controlId="bill_to">
                 <Form.Label>Bill To</Form.Label>
                 <Form.Control type="text" name="bill_to" value={formData.bill_to} onChange={handleChange}/>
-                {errors.bill_to && <p style={{ color: 'red', fontSize: '12px'}}>{errors.bill_to[0]}</p>}
+                {/* {errors.bill_to && <p style={{ color: 'red', fontSize: '12px'}}>{errors.bill_to[0]}</p>} */}
               </Form.Group>
             </Col>
             <Col>
               <Form.Group controlId="address">
                 <Form.Label>Address</Form.Label>
                 <Form.Control type="text" name="address" value={formData.address} onChange={handleChange}/>
-                {errors.address && <p style={{ color: 'red', fontSize: '12px'}}>{errors.address[0]}</p>}
+                {/* {errors.address && <p style={{ color: 'red', fontSize: '12px'}}>{errors.address[0]}</p>} */}
               </Form.Group>
             </Col>
           </Row>
@@ -259,14 +284,14 @@ function Invoices() {
               <Form.Group controlId="gst_no">
                 <Form.Label>GST No.</Form.Label>
                 <Form.Control type="text" name="gst_no" value={formData.gst_no} onChange={handleChange}/>
-                {errors.gst_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.gst_no[0]}</p>}
+                {/* {errors.gst_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.gst_no[0]}</p>} */}
               </Form.Group>
             </Col>
             <Col>
               <Form.Group controlId="branch">
                 <Form.Label>Branch</Form.Label>
                 <Form.Control type="text" name="branch" value={formData.branch} onChange={handleChange}/>
-                {errors.branch && <p style={{ color: 'red', fontSize: '12px'}}>{errors.branch[0]}</p>}
+                {/* {errors.branch && <p style={{ color: 'red', fontSize: '12px'}}>{errors.branch[0]}</p>} */}
               </Form.Group>
             </Col>
           </Row>
@@ -274,18 +299,15 @@ function Invoices() {
             <Col>
               <Form.Group controlId="invoice_no">
                 <Form.Label>Invoice No.</Form.Label>
-                <Form.Control type="text" name="invoice_no" value={formData.invoice_no} 
-                onChange={handleChange}
-                onBlur={e => fetchLRDetails(e.target.value)}
-                />
-                {errors.invoice_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.invoice_no[0]}</p>}
+                <Form.Control type="text" name="invoice_no" value={formData.invoice_no} onChange={handleChange}/>
+                {/* {errors.invoice_no && <p style={{ color: 'red', fontSize: '12px'}}>{errors.invoice_no[0]}</p>} */}
               </Form.Group>
             </Col>
             <Col>
               <Form.Group controlId="date">
                 <Form.Label>Date</Form.Label>
                 <Form.Control type="date" name="date" value={formData.date} onChange={handleChange}/>
-                {errors.date && <p style={{ color: 'red', fontSize: '12px'}}>{errors.date[0]}</p>}
+                {/* {errors.date && <p style={{ color: 'red', fontSize: '12px'}}>{errors.date[0]}</p>} */}
               </Form.Group>
             </Col>
           </Row>
@@ -309,7 +331,10 @@ function Invoices() {
             <tbody>
             {formData.items.map((item, index) => (
             <tr key={index}>
-              <td><Form.Control value={item.lr_no} onChange={(e) => handleItemChange(index, 'lr_no', e.target.value)} /></td>
+              <td><Form.Control value={item.lr_no} 
+                  onChange={(e) => handleItemChange(index, 'lr_no', e.target.value)}
+                  onBlur={(e) => fetchLRDetailsForItem(e.target.value, index)}/>
+              </td>
               <td><Form.Control value={item.truck_no} onChange={(e) => handleItemChange(index, 'truck_no', e.target.value)} readOnly/></td>
               <td><Form.Control value={item.from_to} onChange={(e) => handleItemChange(index, 'from_to', e.target.value)} readOnly/></td>
               <td><Form.Control value={item.material_parcel} onChange={(e) => handleItemChange(index, 'material_parcel', e.target.value)} /></td>
@@ -331,7 +356,7 @@ function Invoices() {
                 <td colSpan="5">HSN	/	SAC	:
                   <Form.Group controlId="hsn_sac">
                     <Form.Control type="text" name="hsn_sac" value={formData.hsn_sac} onChange={handleChange}/>
-                    {errors.hsn_sac && <p style={{ color: 'red', fontSize: '12px'}}>{errors.hsn_sac[0]}</p>}
+                    {/* {errors.hsn_sac && <p style={{ color: 'red', fontSize: '12px'}}>{errors.hsn_sac[0]}</p>} */}
                   </Form.Group>
                 </td>
                 <td colSpan="3">SUB TOTAL</td>
@@ -343,13 +368,13 @@ function Invoices() {
                 <td colSpan="5" rowSpan="2">remarks
                   <Form.Group controlId="remarks">
                     <Form.Control type="text" name="remarks" value={formData.remarks} onChange={handleChange}/>
-                    {errors.remarks && <p style={{ color: 'red', fontSize: '12px'}}>{errors.remarks[0]}</p>}
+                    {/* {errors.remarks && <p style={{ color: 'red', fontSize: '12px'}}>{errors.remarks[0]}</p>} */}
                   </Form.Group></td>
-                <td colSpan="3">DISCOUNT</td>
+                <td colSpan="3">DISCOUNT (%)</td>
                 <td colSpan="2">
                   <Form.Group controlId="discount">
                     <Form.Control type="text" name="discount" value={formData.discount} onChange={handleDiscountChange}/>
-                    {errors.discount && <p style={{ color: 'red', fontSize: '12px'}}>{errors.discount[0]}</p>}
+                    {/* {errors.discount && <p style={{ color: 'red', fontSize: '12px'}}>{errors.discount[0]}</p>} */}
                   </Form.Group></td>
               </tr>
               <tr>
@@ -357,7 +382,7 @@ function Invoices() {
                 <td colSpan="2">
                   <Form.Group controlId="total_trip_amount">
                     <Form.Control type="text" name="total_trip_amount" value={formData.total_trip_amount} readOnly/>
-                    {errors.total_trip_amount && <p style={{ color: 'red', fontSize: '12px'}}>{errors.total_trip_amount[0]}</p>}
+                    {/* {errors.total_trip_amount && <p style={{ color: 'red', fontSize: '12px'}}>{errors.total_trip_amount[0]}</p>} */}
                   </Form.Group>
                 </td>
               </tr>
