@@ -67,10 +67,11 @@ function Invoices() {
       updatedItems[index].trip_amount = freight + halting + extra;
 
       // Recalculate subtotal
-      const updatedSubTotal = updatedItems.reduce(
-        (acc, item) => acc + (parseFloat(item.trip_amount) || 0),
-        0
-      );
+      const updatedSubTotal = updatedItems.reduce((acc, item) => {
+          const lr = parseFloat(item.sub_total) || 0;
+          const trip = parseFloat(item.trip_amount) || 0;
+          return acc + (lr + trip);
+        }, 0);
 
       const advanceReceived = updatedItems.reduce(
         (acc, item) => acc + (parseFloat(item.advance) || 0),
@@ -169,6 +170,7 @@ function Invoices() {
           truck_no: res.data.truck_no || '',
           from_to: res.data.from_to || '',
           total_weight: res.data.total_weight || '',
+          sub_total: res.data.sub_total || '',
         };
 
         // Recalculate trip_amount for this item
@@ -177,11 +179,13 @@ function Invoices() {
         const extra = parseFloat(updatedItems[index].extra_charge) || 0;
         updatedItems[index].trip_amount = freight + halting + extra;
 
-        // Recalculate subtotal and other totals
-        const updatedSubTotal = updatedItems.reduce(
-          (acc, item) => acc + (parseFloat(item.trip_amount) || 0),
-          0
-        );
+        // Totals
+        const updatedSubTotal = updatedItems.reduce((acc, item) => {
+          const lr = parseFloat(item.sub_total) || 0;
+          const trip = parseFloat(item.trip_amount) || 0;
+          return acc + (lr + trip);
+        }, 0);
+
         const advanceReceived = updatedItems.reduce(
           (acc, item) => acc + (parseFloat(item.advance) || 0),
           0
@@ -361,7 +365,9 @@ function Invoices() {
                 </td>
                 <td colSpan="3">SUB TOTAL</td>
                 <td colSpan="2"><Form.Group controlId="sub_total">
-                    <Form.Control type="text" name="sub_total" value={formData.sub_total} readOnly/>
+                    <Form.Control type="text" 
+                    name="sub_total" value={formData.sub_total}
+                    onChange={(e) => handleItemChange(index, 'sub_total', e.target.value)} readOnly/>
                   </Form.Group></td>
               </tr>
               <tr>
